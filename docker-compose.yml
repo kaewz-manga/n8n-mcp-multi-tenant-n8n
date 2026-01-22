@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  n8n-mcp-dynamic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: n8n-mcp-dynamic:custom
+    container_name: n8n-mcp-dynamic
+    ports:
+      - 127.0.0.1:3011:3000
+    environment:
+      # Multi-tenant mode
+      - ENABLE_MULTI_TENANT=true
+      - MULTI_TENANT_SESSION_STRATEGY=instance
+      
+      # Auth token (required for backwards compatibility)
+      - AUTH_TOKEN=n8n-mcp-server-token-2024
+      
+      # MCP mode
+      - MCP_MODE=http
+      - PORT=3000
+      
+      # Production mode
+      - NODE_ENV=production
+      
+      # Disable strict auth for multi-tenant
+      - DISABLE_AUTH_CHECK=false
+      
+      # Rate limits per user
+      - RATE_LIMIT_PER_MINUTE=50
+      - DAILY_LIMIT=100
+      
+      # Logging
+      - LOG_LEVEL=info
+    mem_limit: 512m
+    mem_reservation: 256m
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
