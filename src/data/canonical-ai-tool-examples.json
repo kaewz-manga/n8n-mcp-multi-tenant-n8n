@@ -1,0 +1,310 @@
+{
+  "description": "Canonical configuration examples for critical AI tools based on FINAL_AI_VALIDATION_SPEC.md",
+  "version": "1.0.0",
+  "examples": [
+    {
+      "node_type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "display_name": "HTTP Request Tool",
+      "examples": [
+        {
+          "name": "Weather API Tool",
+          "use_case": "Fetch current weather data for AI Agent",
+          "complexity": "simple",
+          "parameters": {
+            "method": "GET",
+            "url": "https://api.weatherapi.com/v1/current.json?key={{$credentials.weatherApiKey}}&q={city}",
+            "toolDescription": "Get current weather conditions for a city. Provide the city name (e.g., 'London', 'New York') and receive temperature, humidity, wind speed, and conditions.",
+            "placeholderDefinitions": {
+              "values": [
+                {
+                  "name": "city",
+                  "description": "Name of the city to get weather for",
+                  "type": "string"
+                }
+              ]
+            },
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "weatherApiApi"
+          },
+          "credentials": {
+            "weatherApiApi": {
+              "id": "1",
+              "name": "Weather API account"
+            }
+          },
+          "notes": "Example shows proper toolDescription, URL with placeholder, and credential configuration"
+        },
+        {
+          "name": "GitHub Issues Tool",
+          "use_case": "Create GitHub issues from AI Agent conversations",
+          "complexity": "medium",
+          "parameters": {
+            "method": "POST",
+            "url": "https://api.github.com/repos/{owner}/{repo}/issues",
+            "toolDescription": "Create a new GitHub issue. Requires owner (repo owner username), repo (repository name), title, and body. Returns the created issue URL and number.",
+            "placeholderDefinitions": {
+              "values": [
+                {
+                  "name": "owner",
+                  "description": "GitHub repository owner username",
+                  "type": "string"
+                },
+                {
+                  "name": "repo",
+                  "description": "Repository name",
+                  "type": "string"
+                },
+                {
+                  "name": "title",
+                  "description": "Issue title",
+                  "type": "string"
+                },
+                {
+                  "name": "body",
+                  "description": "Issue description and details",
+                  "type": "string"
+                }
+              ]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ { \"title\": $json.title, \"body\": $json.body } }}",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "githubApi"
+          },
+          "credentials": {
+            "githubApi": {
+              "id": "2",
+              "name": "GitHub credentials"
+            }
+          },
+          "notes": "Example shows POST request with JSON body, multiple placeholders, and expressions"
+        },
+        {
+          "name": "Slack Message Tool",
+          "use_case": "Send Slack messages from AI Agent",
+          "complexity": "simple",
+          "parameters": {
+            "method": "POST",
+            "url": "https://slack.com/api/chat.postMessage",
+            "toolDescription": "Send a message to a Slack channel. Provide channel ID or name (e.g., '#general', 'C1234567890') and message text.",
+            "placeholderDefinitions": {
+              "values": [
+                {
+                  "name": "channel",
+                  "description": "Channel ID or name (e.g., #general)",
+                  "type": "string"
+                },
+                {
+                  "name": "text",
+                  "description": "Message text to send",
+                  "type": "string"
+                }
+              ]
+            },
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{$credentials.slackApi.accessToken}}"
+                }
+              ]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ { \"channel\": $json.channel, \"text\": $json.text } }}",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "slackApi"
+          },
+          "credentials": {
+            "slackApi": {
+              "id": "3",
+              "name": "Slack account"
+            }
+          },
+          "notes": "Example shows headers with credential expressions and JSON body construction"
+        }
+      ]
+    },
+    {
+      "node_type": "@n8n/n8n-nodes-langchain.toolCode",
+      "display_name": "Code Tool",
+      "examples": [
+        {
+          "name": "Calculate Shipping Cost",
+          "use_case": "Calculate shipping costs based on weight and distance",
+          "complexity": "simple",
+          "parameters": {
+            "name": "calculate_shipping_cost",
+            "description": "Calculate shipping cost based on package weight (in kg) and distance (in km). Returns the cost in USD.",
+            "language": "javaScript",
+            "code": "const baseRate = 5;\nconst perKgRate = 2;\nconst perKmRate = 0.1;\n\nconst weight = $input.weight || 0;\nconst distance = $input.distance || 0;\n\nconst cost = baseRate + (weight * perKgRate) + (distance * perKmRate);\n\nreturn { cost: parseFloat(cost.toFixed(2)), currency: 'USD' };",
+            "specifyInputSchema": true,
+            "schemaType": "manual",
+            "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"weight\": {\n      \"type\": \"number\",\n      \"description\": \"Package weight in kilograms\"\n    },\n    \"distance\": {\n      \"type\": \"number\",\n      \"description\": \"Shipping distance in kilometers\"\n    }\n  },\n  \"required\": [\"weight\", \"distance\"]\n}"
+          },
+          "notes": "Example shows proper function naming, detailed description, input schema, and return value"
+        },
+        {
+          "name": "Format Customer Data",
+          "use_case": "Transform and validate customer information",
+          "complexity": "medium",
+          "parameters": {
+            "name": "format_customer_data",
+            "description": "Format and validate customer data. Takes raw customer info (name, email, phone) and returns formatted object with validation status.",
+            "language": "javaScript",
+            "code": "const { name, email, phone } = $input;\n\n// Validation\nconst emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\nconst phoneRegex = /^\\+?[1-9]\\d{1,14}$/;\n\nconst errors = [];\nif (!emailRegex.test(email)) errors.push('Invalid email format');\nif (!phoneRegex.test(phone)) errors.push('Invalid phone format');\n\n// Formatting\nconst formatted = {\n  name: name.trim(),\n  email: email.toLowerCase().trim(),\n  phone: phone.replace(/\\s/g, ''),\n  valid: errors.length === 0,\n  errors: errors\n};\n\nreturn formatted;",
+            "specifyInputSchema": true,
+            "schemaType": "manual",
+            "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"Customer full name\"\n    },\n    \"email\": {\n      \"type\": \"string\",\n      \"description\": \"Customer email address\"\n    },\n    \"phone\": {\n      \"type\": \"string\",\n      \"description\": \"Customer phone number\"\n    }\n  },\n  \"required\": [\"name\", \"email\", \"phone\"]\n}"
+          },
+          "notes": "Example shows data validation, formatting, and structured error handling"
+        },
+        {
+          "name": "Parse Date Range",
+          "use_case": "Convert natural language date ranges to ISO format",
+          "complexity": "medium",
+          "parameters": {
+            "name": "parse_date_range",
+            "description": "Parse natural language date ranges (e.g., 'last 7 days', 'this month', 'Q1 2024') into start and end dates in ISO format.",
+            "language": "javaScript",
+            "code": "const input = $input.dateRange || '';\nconst now = new Date();\nlet start, end;\n\nif (input.includes('last') && input.includes('days')) {\n  const days = parseInt(input.match(/\\d+/)[0]);\n  start = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));\n  end = now;\n} else if (input === 'this month') {\n  start = new Date(now.getFullYear(), now.getMonth(), 1);\n  end = new Date(now.getFullYear(), now.getMonth() + 1, 0);\n} else if (input === 'this year') {\n  start = new Date(now.getFullYear(), 0, 1);\n  end = new Date(now.getFullYear(), 11, 31);\n} else {\n  throw new Error('Unsupported date range format');\n}\n\nreturn {\n  startDate: start.toISOString().split('T')[0],\n  endDate: end.toISOString().split('T')[0],\n  daysCount: Math.ceil((end - start) / (24 * 60 * 60 * 1000))\n};",
+            "specifyInputSchema": true,
+            "schemaType": "manual",
+            "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"dateRange\": {\n      \"type\": \"string\",\n      \"description\": \"Natural language date range (e.g., 'last 7 days', 'this month')\"\n    }\n  },\n  \"required\": [\"dateRange\"]\n}"
+          },
+          "notes": "Example shows complex logic, error handling, and date manipulation"
+        }
+      ]
+    },
+    {
+      "node_type": "@n8n/n8n-nodes-langchain.agentTool",
+      "display_name": "AI Agent Tool",
+      "examples": [
+        {
+          "name": "Research Specialist Agent",
+          "use_case": "Specialized sub-agent for in-depth research tasks",
+          "complexity": "medium",
+          "parameters": {
+            "name": "research_specialist",
+            "description": "Expert research agent that can search multiple sources, synthesize information, and provide comprehensive analysis on any topic. Use this when you need detailed, well-researched information.",
+            "promptType": "define",
+            "text": "You are a research specialist. Your role is to:\n1. Search for relevant information from multiple sources\n2. Synthesize findings into a coherent analysis\n3. Cite your sources\n4. Highlight key insights and patterns\n\nProvide thorough, well-structured research that answers the user's question comprehensively.",
+            "systemMessage": "You are a meticulous researcher focused on accuracy and completeness. Always cite sources and acknowledge limitations in available information."
+          },
+          "connections": {
+            "ai_languageModel": [
+              {
+                "node": "OpenAI GPT-4",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ],
+            "ai_tool": [
+              {
+                "node": "SerpApi Tool",
+                "type": "ai_tool",
+                "index": 0
+              },
+              {
+                "node": "Wikipedia Tool",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          },
+          "notes": "Example shows specialized sub-agent with custom prompt, specific system message, and multiple search tools"
+        },
+        {
+          "name": "Data Analysis Agent",
+          "use_case": "Sub-agent for analyzing and visualizing data",
+          "complexity": "complex",
+          "parameters": {
+            "name": "data_analyst",
+            "description": "Data analysis specialist that can process datasets, calculate statistics, identify trends, and generate insights. Use for any data analysis or statistical questions.",
+            "promptType": "auto",
+            "systemMessage": "You are a data analyst with expertise in statistics and data interpretation. Break down complex datasets into understandable insights. Use the Code Tool to perform calculations when needed.",
+            "maxIterations": 10
+          },
+          "connections": {
+            "ai_languageModel": [
+              {
+                "node": "Anthropic Claude",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ],
+            "ai_tool": [
+              {
+                "node": "Code Tool - Stats",
+                "type": "ai_tool",
+                "index": 0
+              },
+              {
+                "node": "HTTP Request Tool - Data API",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          },
+          "notes": "Example shows auto prompt type with specialized system message and analytical tools"
+        }
+      ]
+    },
+    {
+      "node_type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "display_name": "MCP Client Tool",
+      "examples": [
+        {
+          "name": "Filesystem MCP Tool",
+          "use_case": "Access filesystem operations via MCP protocol",
+          "complexity": "medium",
+          "parameters": {
+            "description": "Access file system operations through MCP. Can read files, list directories, create files, and search for content.",
+            "mcpServer": {
+              "transport": "stdio",
+              "command": "npx",
+              "args": ["-y", "@modelcontextprotocol/server-filesystem", "/path/to/allowed/directory"]
+            },
+            "tool": "read_file"
+          },
+          "notes": "Example shows stdio transport MCP server with filesystem access tool"
+        },
+        {
+          "name": "Puppeteer MCP Tool",
+          "use_case": "Browser automation via MCP for AI Agents",
+          "complexity": "complex",
+          "parameters": {
+            "description": "Control a web browser to navigate pages, take screenshots, and extract content. Useful for web scraping and automated testing.",
+            "mcpServer": {
+              "transport": "stdio",
+              "command": "npx",
+              "args": ["-y", "@modelcontextprotocol/server-puppeteer"]
+            },
+            "tool": "puppeteer_navigate"
+          },
+          "notes": "Example shows Puppeteer MCP server for browser automation"
+        },
+        {
+          "name": "Database MCP Tool",
+          "use_case": "Query databases via MCP protocol",
+          "complexity": "complex",
+          "parameters": {
+            "description": "Execute SQL queries and retrieve data from PostgreSQL databases. Supports SELECT, INSERT, UPDATE operations with proper escaping.",
+            "mcpServer": {
+              "transport": "sse",
+              "url": "https://mcp-server.example.com/database"
+            },
+            "tool": "execute_query"
+          },
+          "notes": "Example shows SSE transport MCP server for remote database access"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+// ==== MULTI-TENANT PATCH FOR n8n-mcp-dynamic ====
+// This file contains the changes needed for multi-tenant support
+// Apply these changes to src/http-server-single-session.ts
+
+// CHANGE 1: Add usageStore property (after line 111, after cleanupTimer)
+// Add this line:
+private usageStore: Map<string, { daily: number; minute: number; lastMinuteReset: number; lastDailyReset: number }> = new Map();
+
+// CHANGE 2: Modify auth header (around line 1144)
+// BEFORE:
+const authHeader = req.headers.authorization;
+// AFTER:
+const authHeader = req.headers.authorization || (req.headers["x-n8n-key"] ? "Bearer " + req.headers["x-n8n-key"] : undefined);
+const isMultiTenantRequest = !!req.headers["x-n8n-key"];
+
+// CHANGE 3: Modify isValidToken (around line 1189)
+// BEFORE:
+const isValidToken = this.authToken &&
+  AuthManager.timingSafeCompare(token, this.authToken);
+// AFTER:
+const isValidToken = isMultiTenantRequest || (this.authToken &&
+  AuthManager.timingSafeCompare(token, this.authToken));
+
+// CHANGE 4: Add per-user rate limiters (before authLimiter around line 1063)
+// Add these blocks before authLimiter
+
+// CHANGE 5: Add /stats endpoint (before app.post('/mcp'))
+
+// CHANGE 6: Update app.post('/mcp') to include dailyLimiter, rateLimiter, trackUsage middlewares
