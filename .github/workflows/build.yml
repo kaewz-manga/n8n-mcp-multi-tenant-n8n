@@ -1,0 +1,128 @@
+name: Build Validation
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build:
+    name: Build and Validate
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+      fail-fast: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build TypeScript
+        run: npm run build
+
+      - name: Verify build artifacts
+        run: |
+          echo "Checking build artifacts..."
+
+          # Check main entry points
+          test -f dist/index.js || (echo "ERROR: Missing dist/index.js" && exit 1)
+          test -f dist/index.d.ts || (echo "ERROR: Missing dist/index.d.ts" && exit 1)
+
+          # Check MCP server
+          test -f dist/mcp/index.js || (echo "ERROR: Missing dist/mcp/index.js" && exit 1)
+          test -f dist/mcp/server.js || (echo "ERROR: Missing dist/mcp/server.js" && exit 1)
+          test -f dist/mcp/tools.js || (echo "ERROR: Missing dist/mcp/tools.js" && exit 1)
+
+          # Check core directories
+          test -d dist/loaders || (echo "ERROR: Missing dist/loaders directory" && exit 1)
+          test -d dist/parsers || (echo "ERROR: Missing dist/parsers directory" && exit 1)
+          test -d dist/mappers || (echo "ERROR: Missing dist/mappers directory" && exit 1)
+          test -d dist/database || (echo "ERROR: Missing dist/database directory" && exit 1)
+          test -d dist/services || (echo "ERROR: Missing dist/services directory" && exit 1)
+          test -d dist/mcp || (echo "ERROR: Missing dist/mcp directory" && exit 1)
+
+          # Check scripts
+          test -d dist/scripts || (echo "ERROR: Missing dist/scripts directory" && exit 1)
+
+          echo "✓ All required build artifacts are present"
+
+      - name: Check TypeScript declarations
+        run: |
+          echo "Checking TypeScript declaration files..."
+          MISSING_DECLARATIONS=0
+
+          for js_file in $(find dist -name "*.js" -type f); do
+            dts_file="${js_file%.js}.d.ts"
+            if [ ! -f "$dts_file" ]; then
+              echo "WARNING: Missing declaration file for $js_file"
+              MISSING_DECLARATIONS=$((MISSING_DECLARATIONS + 1))
+            fi
+          done
+
+          if [ $MISSING_DECLARATIONS -gt 0 ]; then
+            echo "Found $MISSING_DECLARATIONS files without declarations"
+          else
+            echo "✓ All JavaScript files have corresponding declaration files"
+          fi
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts-node-${{ matrix.node-version }}
+          path: |
+            dist/
+            !dist/**/*.map
+          retention-days: 7
+
+  build-size-check:
+    name: Build Size Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Analyze build size
+        run: |
+          echo "Build size analysis:"
+          echo "===================="
+
+          DIST_SIZE=$(du -sh dist | cut -f1)
+          DIST_SIZE_BYTES=$(du -sb dist | cut -f1)
+
+          echo "Total dist/ size: $DIST_SIZE ($DIST_SIZE_BYTES bytes)"
+          echo ""
+
+          echo "Largest files:"
+          find dist -type f -exec du -h {} + | sort -rh | head -20
+
+          echo ""
+          echo "Directory sizes:"
+          du -h -d 1 dist/ | sort -rh
+
+# Conceived by Romuald Członkowski - www.aiadvisors.pl/en

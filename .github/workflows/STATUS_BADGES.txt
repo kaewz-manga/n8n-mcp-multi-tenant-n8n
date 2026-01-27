@@ -1,0 +1,27 @@
+GitHub Actions Status Badges
+=============================
+
+Add these badges to your README.md to display workflow status:
+
+CI Pipeline:
+[![CI Pipeline](https://github.com/czlonkowski/n8n-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/czlonkowski/n8n-mcp/actions/workflows/ci.yml)
+
+Comprehensive Testing:
+[![Comprehensive Testing](https://github.com/czlonkowski/n8n-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/czlonkowski/n8n-mcp/actions/workflows/test.yml)
+
+Build Validation:
+[![Build Validation](https://github.com/czlonkowski/n8n-mcp/actions/workflows/build.yml/badge.svg)](https://github.com/czlonkowski/n8n-mcp/actions/workflows/build.yml)
+
+Codecov (if enabled):
+[![codecov](https://codecov.io/gh/czlonkowski/n8n-mcp/branch/main/graph/badge.svg)](https://codecov.io/gh/czlonkowski/n8n-mcp)
+
+All-in-one status section for README:
+======================================
+
+## Build Status
+
+[![CI Pipeline](https://github.com/czlonkowski/n8n-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/czlonkowski/n8n-mcp/actions/workflows/ci.yml)
+[![Comprehensive Testing](https://github.com/czlonkowski/n8n-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/czlonkowski/n8n-mcp/actions/workflows/test.yml)
+[![Build Validation](https://github.com/czlonkowski/n8n-mcp/actions/workflows/build.yml/badge.svg)](https://github.com/czlonkowski/n8n-mcp/actions/workflows/build.yml)
+
+Conceived by Romuald Członkowski - www.aiadvisors.pl/en

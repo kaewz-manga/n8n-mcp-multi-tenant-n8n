@@ -50,4 +50,4 @@ ignore:
   - "**/*.spec.ts"
   - "src/mcp/index.ts"
   - "src/http-server.ts"
-  - "src/http-server-single-session.ts"
+  - "src/http-server/**/*"
