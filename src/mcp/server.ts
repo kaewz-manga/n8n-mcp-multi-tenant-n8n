@@ -28,6 +28,9 @@ import { EarlyErrorLogger } from '../telemetry/early-error-logger';
 import { STARTUP_CHECKPOINTS } from '../telemetry/startup-checkpoints';
 import { dispatchToolCall } from './handlers/tool-dispatcher';
 import { validateExtractedArgs, sanitizeValidationResult, getDisabledTools } from './utils/validation-utils';
+import { ToolValidation, Validator, ValidationError } from '../utils/validation-schemas';
+import { WorkflowValidator } from '../services/workflow-validator';
+import { getWorkflowExampleString } from './workflow-examples';
 
 // Re-export type interfaces for backward compatibility
 export interface NodeRow {

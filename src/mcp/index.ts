@@ -141,11 +141,11 @@ Learn more: https://github.com/czlonkowski/n8n-mcp/blob/main/PRIVACY.md
         console.warn('See: https://github.com/czlonkowski/n8n-mcp/issues/524\n');
 
         // Use the deprecated fixed HTTP implementation
-        const { startFixedHTTPServer } = await import('../http-server');
+        const { startFixedHTTPServer } = await import('../http-server-legacy');
         await startFixedHTTPServer();
       } else {
         // HTTP mode - for remote deployment with single-session architecture
-        const { SingleSessionHTTPServer } = await import('../http-server-single-session');
+        const { SingleSessionHTTPServer } = await import('../http-server');
         const server = new SingleSessionHTTPServer();
         
         // Graceful shutdown handlers
