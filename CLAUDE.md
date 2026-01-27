@@ -65,8 +65,13 @@ src/
 ├── utils/
 │   ├── console-manager.ts     # Console output isolation (NEW in v2.3.1)
 │   └── logger.ts              # Logging utility with HTTP awareness
-├── http-server-single-session.ts  # Single-session HTTP server (NEW in v2.3.1)
-│                                   # Session persistence API (NEW in v2.24.1)
+├── http-server/               # Modular HTTP server (refactored v2.33.2)
+│   ├── index.ts               # Main server with Express setup
+│   ├── session-manager.ts     # Session lifecycle management
+│   ├── request-handler.ts     # MCP request handling
+│   ├── session-persistence.ts # Export/restore API (NEW in v2.24.1)
+│   ├── sse-middleware.ts      # SSE to JSON conversion
+│   └── types.ts               # Type definitions
 ├── mcp-engine.ts              # Clean API for service integration (NEW in v2.3.1)
 │                                # Session persistence wrappers (NEW in v2.24.1)
 └── index.ts                   # Library exports
@@ -199,8 +204,9 @@ The MCP server exposes tools in several categories:
 
 **Location:**
 - Types: `src/types/session-state.ts`
-- Implementation: `src/http-server-single-session.ts` (lines 698-702, 1444-1584)
-- Wrapper: `src/mcp-engine.ts` (lines 123-169)
+- Implementation: `src/http-server/session-manager.ts` and `src/http-server/session-persistence.ts`
+- Main Server: `src/http-server/index.ts`
+- Wrapper: `src/mcp-engine.ts`
 - Tests: `tests/unit/http-server/session-persistence.test.ts`, `tests/unit/mcp-engine/session-persistence.test.ts`
 
 **Key Features:**

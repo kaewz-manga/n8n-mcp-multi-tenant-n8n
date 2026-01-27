@@ -95,7 +95,7 @@ curl -X POST https://your-domain.com/mcp   -H Content-Type: application/json   -
 
 | File | Change | Reason |
 |------|--------|--------|
-| `src/http-server-single-session.ts` | Added SSE-to-JSON middleware (line ~785) | n8n doesn't send SSE header |
+| `src/http-server/sse-middleware.ts` | Added SSE-to-JSON middleware | n8n doesn't send SSE header |
 | `docker-compose.yml` | Updated environment variables | Multi-tenant configuration |
 
 ## Differences from Original

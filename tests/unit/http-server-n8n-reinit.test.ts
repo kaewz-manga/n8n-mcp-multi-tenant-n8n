@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { SingleSessionHTTPServer } from '../../src/http-server-single-session';
+import { SingleSessionHTTPServer } from '../../src/http-server';
 import express from 'express';
 
 describe('HTTP Server n8n Re-initialization', () => {

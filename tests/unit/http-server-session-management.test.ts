@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi, MockedFunction } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
-import { SingleSessionHTTPServer } from '../../src/http-server-single-session';
+import { SingleSessionHTTPServer } from '../../src/http-server';
 
 // Mock dependencies
 vi.mock('../../src/utils/logger', () => ({
