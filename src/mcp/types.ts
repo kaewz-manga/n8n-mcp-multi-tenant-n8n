@@ -2,6 +2,23 @@
  * Type definitions for MCP server
  */
 
+import { DatabaseAdapter } from '../database/database-adapter';
+import { NodeRepository } from '../database/node-repository';
+import { TemplateService } from '../templates/template-service';
+import { SimpleCache } from '../utils/simple-cache';
+import { InstanceContext } from '../types/instance-context';
+
+/**
+ * Server context passed to all handler functions
+ */
+export interface ServerContext {
+  db: DatabaseAdapter;
+  repository: NodeRepository;
+  cache: SimpleCache;
+  templateService: TemplateService;
+  instanceContext?: InstanceContext;
+}
+
 export interface NodeRow {
   node_type: string;
   package_name: string;
