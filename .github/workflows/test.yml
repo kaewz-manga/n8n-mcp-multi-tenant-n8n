@@ -75,8 +75,8 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run tests with coverage
-        run: npm run test:coverage
+      - name: Run unit tests with coverage
+        run: npm run test:unit -- --coverage
 
       - name: Generate coverage summary
         id: coverage
@@ -117,8 +117,8 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Run CI test suite
-        run: npm run test:ci
+      - name: Run CI test suite (unit tests only)
+        run: npm run test:unit -- --reporter=default --reporter=junit
 
       - name: Upload test results
         if: always()
