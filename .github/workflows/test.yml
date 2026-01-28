@@ -23,8 +23,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps || npm install --force
-        continue-on-error: false
+        run: npm install
 
       - name: Build project
         run: npm run build
@@ -47,8 +46,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps || npm install --force
-        continue-on-error: false
+        run: npm install
 
       - name: Build project
         run: npm run build
@@ -72,8 +70,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps || npm install --force
-        continue-on-error: false
+        run: npm install
 
       - name: Build project
         run: npm run build
@@ -115,8 +112,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps || npm install --force
-        continue-on-error: false
+        run: npm install
 
       - name: Build project
         run: npm run build
