@@ -27,6 +27,7 @@ import { telemetry } from '../telemetry';
 import { EarlyErrorLogger } from '../telemetry/early-error-logger';
 import { STARTUP_CHECKPOINTS } from '../telemetry/startup-checkpoints';
 import { dispatchToolCall } from './handlers/tool-dispatcher';
+import * as NodeInfoHandlers from './handlers/node-info-handlers';
 import { validateExtractedArgs, sanitizeValidationResult, getDisabledTools } from './utils/validation-utils';
 import { ToolValidation, Validator, ValidationError } from '../utils/validation-schemas';
 import { WorkflowValidator } from '../services/workflow-validator';
@@ -1008,6 +1009,85 @@ export class N8NDocumentationMCPServer {
       templateService: this.templateService!,
       instanceContext: this.instanceContext
     });
+  }
+
+  // Wrapper methods for backward compatibility with tests
+  async getNode(
+    nodeType: string,
+    detail: string = 'standard',
+    mode: string = 'info',
+    includeTypeInfo: boolean = false,
+    includeExamples: boolean = false,
+    fromVersion?: string,
+    toVersion?: string
+  ): Promise<any> {
+    await this.ensureInitialized();
+
+    // Validate parameters
+    const validDetailLevels = ['minimal', 'standard', 'full'];
+    const validModes = ['info', 'versions', 'compare', 'breaking', 'migrations'];
+
+    if (!validDetailLevels.includes(detail)) {
+      throw new Error(`get_node: Invalid detail level "${detail}". Valid options: ${validDetailLevels.join(', ')}`);
+    }
+
+    if (!validModes.includes(mode)) {
+      throw new Error(`get_node: Invalid mode "${mode}". Valid options: ${validModes.join(', ')}`);
+    }
+
+    // Route to appropriate mode handler
+    if (mode === 'info') {
+      return this.handleInfoMode(nodeType, detail, includeTypeInfo, includeExamples);
+    } else {
+      return this.handleVersionMode(nodeType, mode, fromVersion, toVersion);
+    }
+  }
+
+  enrichPropertyWithTypeInfo(property: any): any {
+    return NodeInfoHandlers.enrichPropertyWithTypeInfo(property);
+  }
+
+  enrichPropertiesWithTypeInfo(properties: any[]): any[] {
+    return NodeInfoHandlers.enrichPropertiesWithTypeInfo(properties);
+  }
+
+  getVersionSummary(nodeType: string): any {
+    return NodeInfoHandlers.getVersionSummary(nodeType, this.repository!, this.cache);
+  }
+
+  async handleInfoMode(
+    nodeType: string,
+    detail: string,
+    includeTypeInfo: boolean,
+    includeExamples: boolean
+  ): Promise<any> {
+    await this.ensureInitialized();
+    return NodeInfoHandlers.handleInfoMode(
+      nodeType,
+      detail,
+      includeTypeInfo,
+      includeExamples,
+      this.repository!,
+      this.db!,
+      this.cache
+    );
+  }
+
+  async handleVersionMode(
+    nodeType: string,
+    mode: string,
+    fromVersion: string | undefined,
+    toVersion: string | undefined
+  ): Promise<any> {
+    await this.ensureInitialized();
+    return NodeInfoHandlers.handleVersionMode(
+      nodeType,
+      mode,
+      fromVersion,
+      toVersion,
+      this.repository!,
+      this.cache
+    );
   }
 
   // Add connect method to accept any transport
