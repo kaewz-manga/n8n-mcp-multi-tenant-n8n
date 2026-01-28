@@ -4,8 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { SingleSessionHTTPServer } from '../../src/http-server';
-import { SessionState } from '../../src/types/session-state';
+import { SingleSessionHTTPServer } from '../../../src/http-server/index';
+import { SessionState } from '../../../src/types/session-state';
 
 describe('SingleSessionHTTPServer - Session Persistence', () => {
   let server: SingleSessionHTTPServer;
