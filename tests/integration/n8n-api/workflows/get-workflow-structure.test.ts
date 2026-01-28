@@ -15,7 +15,8 @@ import { createMcpContext } from '../utils/mcp-context';
 import { InstanceContext } from '../../../../src/types/instance-context';
 import { handleGetWorkflowStructure } from '../../../../src/mcp/handlers-n8n-manager';
 
-describe('Integration: handleGetWorkflowStructure', () => {
+// Skip in CI - requires real n8n server
+describe.skipIf(process.env.CI)('Integration: handleGetWorkflowStructure', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

@@ -11,7 +11,8 @@ import { InstanceContext } from '../../../../src/types/instance-context';
 import { handleGetExecution, handleTriggerWebhookWorkflow } from '../../../../src/mcp/handlers-n8n-manager';
 import { getN8nCredentials } from '../utils/credentials';
 
-describe('Integration: handleGetExecution', () => {
+// Skip in CI - requires real n8n server
+describe.skipIf(process.env.CI)('Integration: handleGetExecution', () => {
   let mcpContext: InstanceContext;
   let executionId: string;
   let webhookUrl: string;

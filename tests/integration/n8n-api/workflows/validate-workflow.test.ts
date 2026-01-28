@@ -18,7 +18,8 @@ import { getNodeRepository, closeNodeRepository } from '../utils/node-repository
 import { NodeRepository } from '../../../../src/database/node-repository';
 import { ValidationResponse } from '../types/mcp-responses';
 
-describe('Integration: handleValidateWorkflow', () => {
+// Skip in CI - requires real n8n server
+describe.skipIf(process.env.CI)('Integration: handleValidateWorkflow', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

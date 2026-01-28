@@ -11,7 +11,8 @@ import { InstanceContext } from '../../../../src/types/instance-context';
 import { handleDiagnostic } from '../../../../src/mcp/handlers-n8n-manager';
 import { DiagnosticResponse } from '../utils/response-types';
 
-describe('Integration: handleDiagnostic', () => {
+// Skip in CI - requires real n8n server
+describe.skipIf(process.env.CI)('Integration: handleDiagnostic', () => {
   let mcpContext: InstanceContext;
 
   beforeEach(() => {

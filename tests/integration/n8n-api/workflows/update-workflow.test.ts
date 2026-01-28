@@ -16,7 +16,8 @@ import { InstanceContext } from '../../../../src/types/instance-context';
 import { NodeRepository } from '../../../../src/database/node-repository';
 import { handleUpdateWorkflow } from '../../../../src/mcp/handlers-n8n-manager';
 
-describe('Integration: handleUpdateWorkflow', () => {
+// Skip in CI - requires real n8n server
+describe.skipIf(process.env.CI)('Integration: handleUpdateWorkflow', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

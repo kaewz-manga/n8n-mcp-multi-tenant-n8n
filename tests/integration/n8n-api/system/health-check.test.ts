@@ -11,7 +11,8 @@ import { InstanceContext } from '../../../../src/types/instance-context';
 import { handleHealthCheck } from '../../../../src/mcp/handlers-n8n-manager';
 import { HealthCheckResponse } from '../utils/response-types';
 
-describe('Integration: handleHealthCheck', () => {
+// Skip in CI - requires real n8n server
+describe.skipIf(process.env.CI)('Integration: handleHealthCheck', () => {
   let mcpContext: InstanceContext;
 
   beforeEach(() => {
