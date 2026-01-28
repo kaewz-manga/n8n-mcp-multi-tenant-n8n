@@ -15,7 +15,7 @@ import type { NodePropertyTypes } from 'n8n-workflow';
 import type { TypeStructure } from '../types/type-structures';
 
 /**
- * Complete type structure definitions for all NodePropertyTypes
+ * Complete type structure definitions for all 23 NodePropertyTypes
  *
  * Each entry defines:
  * - type: Category (primitive/object/collection/special)
