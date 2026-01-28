@@ -39,12 +39,10 @@ If installing manually (not using Docker):
 ```bash
 git clone https://github.com/kaewz-manga/n8n-mcp-multi-tenant-n8n.git
 cd n8n-mcp-multi-tenant-n8n
-npm install --legacy-peer-deps  # Important: use --legacy-peer-deps
+npm install
 npm run build
 npm run rebuild
 ```
-
-> **Note:** Use `--legacy-peer-deps` to avoid dependency resolution issues.
 
 ### 1. Environment Variables
 

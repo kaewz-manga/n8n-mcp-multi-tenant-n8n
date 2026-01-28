@@ -149,10 +149,8 @@ docker cp n8n-mcp:/app/data/nodes.db ./nodes-backup.db
 
 3. **Install dependencies:**
    ```bash
-   npm install --legacy-peer-deps
+   npm install
    ```
-
-   > **Note:** Use `--legacy-peer-deps` to avoid dependency resolution issues with sheetjs CDN access.
 
 4. **Build the project:**
    ```bash
@@ -215,7 +213,7 @@ REBUILD_ON_START=false
    ```bash
    git clone https://github.com/czlonkowski/n8n-mcp.git
    cd n8n-mcp
-   npm install --legacy-peer-deps
+   npm install
    ```
 
 2. **Set up development environment:**
@@ -272,26 +270,20 @@ REBUILD_ON_START=false
 
 #### npm install Fails with Error 403 (sheetjs CDN)
 
-**Symptoms:**
-```
-npm error code E403
-npm error 403 403 Forbidden - GET https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz
+**Status:** ✅ **Fixed in current version**
+
+This issue has been resolved by adding an npm override in `package.json` that forces xlsx to use the npm registry instead of the sheetjs CDN.
+
+If you're using an older version, update to the latest version:
+```bash
+git pull origin main
+npm install
 ```
 
-**Solution:**
-Use `--legacy-peer-deps` flag:
+**For older versions (before fix):**
 ```bash
 npm install --legacy-peer-deps
 ```
-
-Or if that doesn't work:
-```bash
-npm install --force
-```
-
-**Why this happens:**
-- The sheetjs package uses a custom CDN that may have access restrictions
-- Using `--legacy-peer-deps` bypasses some dependency resolution issues
 
 #### Port Already in Use
 ```bash
