@@ -540,6 +540,22 @@ export const TYPE_STRUCTURES: Record<NodePropertyTypes, TypeStructure> = {
 		],
 	},
 
+	icon: {
+		type: 'special',
+		jsType: 'string',
+		description: 'Icon display property for visual elements',
+		example: 'fa:envelope',
+		validation: {
+			allowEmpty: true,
+			allowExpressions: false,
+		},
+		notes: [
+			'Displays an icon in the UI',
+			'Uses Font Awesome icon syntax',
+			'Does not affect node execution',
+		],
+	},
+
 	button: {
 		type: 'special',
 		jsType: 'string',
