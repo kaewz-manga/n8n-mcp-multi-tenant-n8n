@@ -12,7 +12,7 @@ import { handleDeleteExecution, handleTriggerWebhookWorkflow, handleGetExecution
 import { getN8nCredentials } from '../utils/credentials';
 
 // Skip in CI - requires real n8n server
-describe.skipIf(process.env.CI)('Integration: handleDeleteExecution', () => {
+describe('Integration: handleDeleteExecution', () => {
   let mcpContext: InstanceContext;
   let webhookUrl: string;
 

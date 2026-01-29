@@ -18,7 +18,7 @@ import { NodeRepository } from '../../../../src/database/node-repository';
 import { handleUpdatePartialWorkflow } from '../../../../src/mcp/handlers-workflow-diff';
 
 // Skip in CI - requires real n8n server
-describe.skipIf(process.env.CI)('Integration: handleUpdatePartialWorkflow', () => {
+describe('Integration: handleUpdatePartialWorkflow', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

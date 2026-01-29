@@ -12,7 +12,7 @@ import { handleTriggerWebhookWorkflow } from '../../../../src/mcp/handlers-n8n-m
 import { getN8nCredentials } from '../utils/credentials';
 
 // Skip in CI - requires real n8n server
-describe.skipIf(process.env.CI)('Integration: handleTriggerWebhookWorkflow', () => {
+describe('Integration: handleTriggerWebhookWorkflow', () => {
   let mcpContext: InstanceContext;
   let webhookUrls: {
     get: string;
