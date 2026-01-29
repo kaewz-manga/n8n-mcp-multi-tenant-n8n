@@ -27,7 +27,8 @@ import {
 } from './helpers';
 import { WorkflowNode } from '../../../src/types/n8n-api';
 
-describe('Integration: Chat Trigger Validation', () => {
+// Skip in CI - requires rebuilt node database
+describe.skipIf(process.env.CI)('Integration: Chat Trigger Validation', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

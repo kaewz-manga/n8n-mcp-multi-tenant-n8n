@@ -30,7 +30,8 @@ import {
   createAIWorkflow
 } from './helpers';
 
-describe('Integration: End-to-End AI Workflow Validation', () => {
+// Skip in CI - requires rebuilt node database
+describe.skipIf(process.env.CI)('Integration: End-to-End AI Workflow Validation', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;
