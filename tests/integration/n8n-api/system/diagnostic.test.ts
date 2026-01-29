@@ -12,7 +12,7 @@ import { handleDiagnostic } from '../../../../src/mcp/handlers-n8n-manager';
 import { DiagnosticResponse } from '../utils/response-types';
 
 // Skip in CI - requires real n8n server
-describe.skipIf(process.env.CI)('Integration: handleDiagnostic', () => {
+describe('Integration: handleDiagnostic', () => {
   let mcpContext: InstanceContext;
 
   beforeEach(() => {

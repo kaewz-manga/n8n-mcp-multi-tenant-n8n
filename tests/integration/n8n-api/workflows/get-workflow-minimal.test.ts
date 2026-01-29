@@ -16,7 +16,7 @@ import { InstanceContext } from '../../../../src/types/instance-context';
 import { handleGetWorkflowMinimal } from '../../../../src/mcp/handlers-n8n-manager';
 
 // Skip in CI - requires real n8n server
-describe.skipIf(process.env.CI)('Integration: handleGetWorkflowMinimal', () => {
+describe('Integration: handleGetWorkflowMinimal', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

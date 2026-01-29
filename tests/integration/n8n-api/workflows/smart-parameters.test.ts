@@ -26,7 +26,7 @@ import { handleUpdatePartialWorkflow } from '../../../../src/mcp/handlers-workfl
 import { Workflow } from '../../../../src/types/n8n-api';
 
 // Skip in CI - these tests require a real n8n server
-describe.skipIf(process.env.CI)('Integration: Smart Parameters with Real n8n API', () => {
+describe('Integration: Smart Parameters with Real n8n API', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;
