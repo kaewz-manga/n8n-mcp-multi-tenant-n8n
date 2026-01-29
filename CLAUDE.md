@@ -36,7 +36,7 @@ src/
 │   ├── instance-context.ts     # Multi-tenant instance configuration
 │   └── session-state.ts        # Session persistence types (NEW in v2.24.1)
 ├── constants/
-│   └── type-structures.ts      # 22 complete type structures (NEW in v2.22.21)
+│   └── type-structures.ts      # 23 complete type structures (NEW in v2.22.21)
 ├── templates/
 │   ├── template-fetcher.ts    # Fetches templates from n8n.io API (NEW in v2.4.1)
 │   ├── template-repository.ts # Template database operations (NEW in v2.4.1)

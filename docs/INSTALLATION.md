@@ -130,7 +130,7 @@ docker cp n8n-mcp:/app/data/nodes.db ./nodes-backup.db
 
 ### Prerequisites
 
-- Node.js v16+ (v20+ recommended)
+- Node.js v20+ (v22+ recommended)
 - npm or yarn
 - Git
 
