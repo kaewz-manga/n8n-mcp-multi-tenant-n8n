@@ -32,6 +32,18 @@ Added middleware to:
 
 ## Quick Start
 
+### 0. Installation (Manual)
+
+If installing manually (not using Docker):
+
+```bash
+git clone https://github.com/kaewz-manga/n8n-mcp-multi-tenant-n8n.git
+cd n8n-mcp-multi-tenant-n8n
+npm install
+npm run build
+npm run rebuild
+```
+
 ### 1. Environment Variables
 
 ```env
@@ -95,7 +107,7 @@ curl -X POST https://your-domain.com/mcp   -H Content-Type: application/json   -
 
 | File | Change | Reason |
 |------|--------|--------|
-| `src/http-server-single-session.ts` | Added SSE-to-JSON middleware (line ~785) | n8n doesn't send SSE header |
+| `src/http-server/sse-middleware.ts` | Added SSE-to-JSON middleware | n8n doesn't send SSE header |
 | `docker-compose.yml` | Updated environment variables | Multi-tenant configuration |
 
 ## Differences from Original

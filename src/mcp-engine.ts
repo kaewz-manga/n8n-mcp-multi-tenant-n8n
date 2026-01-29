@@ -6,7 +6,7 @@
  * multi-tenancy, rate limiting, etc.
  */
 import { Request, Response } from 'express';
-import { SingleSessionHTTPServer } from './http-server-single-session';
+import { SingleSessionHTTPServer } from './http-server';
 import { logger } from './utils/logger';
 import { InstanceContext } from './types/instance-context';
 import { SessionState } from './types/session-state';

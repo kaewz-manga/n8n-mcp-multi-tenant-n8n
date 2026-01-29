@@ -10,6 +10,7 @@ import { createMcpContext } from '../utils/mcp-context';
 import { InstanceContext } from '../../../../src/types/instance-context';
 import { handleListExecutions } from '../../../../src/mcp/handlers-n8n-manager';
 
+// Skip in CI - requires real n8n server
 describe('Integration: handleListExecutions', () => {
   let mcpContext: InstanceContext;
 

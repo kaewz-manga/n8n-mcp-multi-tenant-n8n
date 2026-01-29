@@ -268,6 +268,23 @@ REBUILD_ON_START=false
 
 ### Common Issues
 
+#### npm install Fails with Error 403 (sheetjs CDN)
+
+**Status:** ✅ **Fixed in current version**
+
+This issue has been resolved by adding an npm override in `package.json` that forces xlsx to use the npm registry instead of the sheetjs CDN.
+
+If you're using an older version, update to the latest version:
+```bash
+git pull origin main
+npm install
+```
+
+**For older versions (before fix):**
+```bash
+npm install --legacy-peer-deps
+```
+
 #### Port Already in Use
 ```bash
 # Find process using port 3000

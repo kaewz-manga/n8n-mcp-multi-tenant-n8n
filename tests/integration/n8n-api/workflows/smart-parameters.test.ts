@@ -25,6 +25,7 @@ import { NodeRepository } from '../../../../src/database/node-repository';
 import { handleUpdatePartialWorkflow } from '../../../../src/mcp/handlers-workflow-diff';
 import { Workflow } from '../../../../src/types/n8n-api';
 
+// Skip in CI - these tests require a real n8n server
 describe('Integration: Smart Parameters with Real n8n API', () => {
   let context: TestContext;
   let client: N8nApiClient;

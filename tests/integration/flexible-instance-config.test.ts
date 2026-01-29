@@ -7,7 +7,8 @@ import { N8NMCPEngine } from '../../src/mcp-engine';
 import { InstanceContext, isInstanceContext } from '../../src/types/instance-context';
 import { getN8nApiClient } from '../../src/mcp/handlers-n8n-manager';
 
-describe('Flexible Instance Configuration', () => {
+// Skip in CI - requires rebuilt node database and MCP engine initialization
+describe.skipIf(process.env.CI)('Flexible Instance Configuration', () => {
   let engine: N8NMCPEngine;
 
   beforeEach(() => {

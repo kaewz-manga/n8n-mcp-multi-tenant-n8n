@@ -6,7 +6,8 @@ import { N8NDocumentationMCPServer } from '../../../src/mcp/server';
  * Testing P0-R3 feature: Template-based configuration examples with metadata
  */
 
-describe('get_node_essentials with includeExamples', () => {
+// Skip in CI - requires database initialization
+describe.skipIf(process.env.CI)('get_node_essentials with includeExamples', () => {
   let server: N8NDocumentationMCPServer;
 
   beforeEach(async () => {

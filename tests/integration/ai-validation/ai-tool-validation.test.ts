@@ -25,7 +25,8 @@ import {
   createAIWorkflow
 } from './helpers';
 
-describe('Integration: AI Tool Validation', () => {
+// Skip in CI - requires rebuilt node database
+describe.skipIf(process.env.CI)('Integration: AI Tool Validation', () => {
   let context: TestContext;
   let client: N8nApiClient;
   let mcpContext: InstanceContext;

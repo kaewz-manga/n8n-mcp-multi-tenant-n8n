@@ -15,7 +15,7 @@ import type { NodePropertyTypes } from 'n8n-workflow';
 import type { TypeStructure } from '../types/type-structures';
 
 /**
- * Complete type structure definitions for all 22 NodePropertyTypes
+ * Complete type structure definitions for all 23 NodePropertyTypes
  *
  * Each entry defines:
  * - type: Category (primitive/object/collection/special)
@@ -537,6 +537,22 @@ export const TYPE_STRUCTURES: Record<NodePropertyTypes, TypeStructure> = {
 			'Not rendered in UI',
 			'Can store metadata or computed values',
 			'Often used for version tracking',
+		],
+	},
+
+	icon: {
+		type: 'special',
+		jsType: 'string',
+		description: 'Icon display property for visual elements',
+		example: 'fa:envelope',
+		validation: {
+			allowEmpty: true,
+			allowExpressions: false,
+		},
+		notes: [
+			'Displays an icon in the UI',
+			'Uses Font Awesome icon syntax',
+			'Does not affect node execution',
 		],
 	},
 

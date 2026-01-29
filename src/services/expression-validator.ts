@@ -1,9 +1,14 @@
 /**
  * Expression Validator for n8n expressions
  * Validates expression syntax, variable references, and context availability
+ *
+ * Uses UniversalExpressionValidator for base syntax validation (brackets, empty expressions, etc.)
+ * and adds semantic validation (variable context, node references, etc.)
  */
 
-interface ExpressionValidationResult {
+import { UniversalExpressionValidator } from './universal-expression-validator.js';
+
+export interface ExpressionValidationResult {
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -11,7 +16,7 @@ interface ExpressionValidationResult {
   usedNodes: Set<string>;
 }
 
-interface ExpressionContext {
+export interface ExpressionContext {
   availableNodes: string[];
   currentNodeName?: string;
   isInLoop?: boolean;
@@ -64,9 +69,17 @@ export class ExpressionValidator {
       return result;
     }
 
-    // Check for basic syntax errors
-    const syntaxErrors = this.checkSyntaxErrors(expression);
-    result.errors.push(...syntaxErrors);
+    // Use UniversalExpressionValidator for syntax validation
+    const syntaxValidation = UniversalExpressionValidator.validateExpressionSyntax(expression);
+    if (!syntaxValidation.isValid) {
+      result.errors.push(syntaxValidation.explanation);
+    }
+
+    // Check for common pattern issues (template literals, nested brackets, etc.)
+    const patternValidation = UniversalExpressionValidator.validateCommonPatterns(expression);
+    if (!patternValidation.isValid) {
+      result.errors.push(patternValidation.explanation);
+    }
 
     // Extract all expressions
     const expressions = this.extractExpressions(expression);
@@ -81,37 +94,6 @@ export class ExpressionValidator {
 
     result.valid = result.errors.length === 0;
     return result;
-  }
-
-  /**
-   * Check for basic syntax errors
-   */
-  private static checkSyntaxErrors(expression: string): string[] {
-    const errors: string[] = [];
-
-    // Check for unmatched brackets
-    const openBrackets = (expression.match(/\{\{/g) || []).length;
-    const closeBrackets = (expression.match(/\}\}/g) || []).length;
-    
-    if (openBrackets !== closeBrackets) {
-      errors.push('Unmatched expression brackets {{ }}');
-    }
-
-    // Check for truly nested expressions (not supported in n8n)
-    // This means {{ inside another {{ }}, like {{ {{ $json }} }}
-    // NOT multiple expressions like {{ $json.a }} text {{ $json.b }} (which is valid)
-    const nestedPattern = /\{\{[^}]*\{\{/;
-    if (nestedPattern.test(expression)) {
-      errors.push('Nested expressions are not supported (expression inside another expression)');
-    }
-
-    // Check for empty expressions
-    const emptyExpressionPattern = /\{\{\s*\}\}/;
-    if (emptyExpressionPattern.test(expression)) {
-      errors.push('Empty expression found');
-    }
-
-    return errors;
   }
 
   /**
@@ -242,12 +224,7 @@ export class ExpressionValidator {
       );
     }
 
-    // Check for template literals
-    if (expr.includes('${')) {
-      result.errors.push(
-        'Template literals ${} are not supported. Use string concatenation instead'
-      );
-    }
+    // Note: Template literal checking is now handled by UniversalExpressionValidator
   }
 
   /**
