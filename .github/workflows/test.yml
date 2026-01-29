@@ -34,13 +34,29 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
-    environment: n8n-mcp-multi-tanant-n8n
+
+    services:
+      n8n:
+        image: n8nio/n8n:latest
+        ports:
+          - 5678:5678
+        env:
+          N8N_BASIC_AUTH_ACTIVE: "false"
+          N8N_HOST: localhost
+          N8N_PORT: 5678
+          N8N_PROTOCOL: http
+          NODE_ENV: development
+        options: >-
+          --health-cmd "wget -qO- http://localhost:5678/healthz || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
 
     env:
-      N8N_API_URL: ${{ secrets.N8N_API_URL }}
-      N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
-      N8N_TEST_CLEANUP_ENABLED: ${{ secrets.N8N_TEST_CLEANUP_ENABLED }}
-      N8N_TEST_TAG: ${{ secrets.N8N_TEST_TAG }}
+      N8N_API_URL: http://localhost:5678
+      N8N_TEST_CLEANUP_ENABLED: "true"
+      N8N_TEST_TAG: mcp-integration-test
 
     steps:
       - name: Checkout code
@@ -58,7 +74,91 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Setup n8n owner and create API key
+        id: n8n-setup
+        run: |
+          # Wait for n8n to be fully ready
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:5678/healthz > /dev/null 2>&1; then
+              echo "n8n is ready"
+              break
+            fi
+            echo "Waiting for n8n... ($i/30)"
+            sleep 2
+          done
+
+          # Setup owner account
+          node -e "
+          const http = require('http');
+          function post(path, body) {
+            return new Promise((resolve, reject) => {
+              const data = JSON.stringify(body);
+              const req = http.request({hostname:'localhost',port:5678,path,method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(data)}}, res => {
+                let b = '';
+                res.on('data', c => b += c);
+                res.on('end', () => resolve({status:res.statusCode,headers:res.headers,body:JSON.parse(b)}));
+              });
+              req.on('error', reject);
+              req.write(data);
+              req.end();
+            });
+          }
+          function get(path, headers) {
+            return new Promise((resolve, reject) => {
+              const req = http.request({hostname:'localhost',port:5678,path,method:'GET',headers}, res => {
+                let b = '';
+                res.on('data', c => b += c);
+                res.on('end', () => resolve({status:res.statusCode,body:JSON.parse(b)}));
+              });
+              req.on('error', reject);
+              req.end();
+            });
+          }
+          (async () => {
+            // 1. Setup owner
+            console.log('Setting up owner...');
+            const setup = await post('/rest/owner/setup', {email:'ci@test.local',firstName:'CI',lastName:'Test',password:'CiTestPass123!'});
+            if (setup.status !== 200) { console.error('Setup failed:', setup.status, JSON.stringify(setup.body)); process.exit(1); }
+            console.log('Owner created:', setup.body.data.email);
+
+            // 2. Login
+            console.log('Logging in...');
+            const login = await post('/rest/login', {emailOrLdapLoginId:'ci@test.local',password:'CiTestPass123!'});
+            if (login.status !== 200) { console.error('Login failed:', login.status, JSON.stringify(login.body)); process.exit(1); }
+            const cookie = login.headers['set-cookie']?.map(c => c.split(';')[0]).join('; ');
+            console.log('Login OK');
+
+            // 3. Get available scopes
+            const scopesResp = await get('/rest/api-keys/scopes', {Cookie: cookie});
+            const scopes = scopesResp.body.data;
+            console.log('Available scopes:', scopes.length);
+
+            // 4. Create API key with all scopes
+            const expiresAt = Date.now() + (24 * 60 * 60 * 1000); // 24h
+            const keyBody = JSON.stringify({label:'ci-key', scopes, expiresAt});
+            const keyResp = await new Promise((resolve, reject) => {
+              const req = http.request({hostname:'localhost',port:5678,path:'/rest/api-keys',method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(keyBody),'Cookie':cookie}}, res => {
+                let b = '';
+                res.on('data', c => b += c);
+                res.on('end', () => resolve({status:res.statusCode,body:JSON.parse(b)}));
+              });
+              req.on('error', reject);
+              req.write(keyBody);
+              req.end();
+            });
+            if (keyResp.status !== 200) { console.error('API key creation failed:', keyResp.status, JSON.stringify(keyResp.body)); process.exit(1); }
+            const apiKey = keyResp.body.data.rawApiKey;
+            console.log('API key created successfully');
+
+            // 5. Output for GitHub Actions
+            const fs = require('fs');
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, 'api_key=' + apiKey + '\n');
+          })().catch(e => { console.error(e); process.exit(1); });
+          "
+
       - name: Run integration tests
+        env:
+          N8N_API_KEY: ${{ steps.n8n-setup.outputs.api_key }}
         run: npm run test:integration -- --teardownTimeout 5000
         timeout-minutes: 15
 
