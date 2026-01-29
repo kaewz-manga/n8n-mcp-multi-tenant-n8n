@@ -172,9 +172,9 @@ After restarting Claude Desktop:
 
 **"TransformStream is not defined" error:**
 - Cause: Node.js version < 18
-- Fix: Update Node.js to v18 or newer
+- Fix: Update Node.js to v20 or newer
   ```bash
-  node --version  # Should be v18.0.0 or higher
+  node --version  # Should be v20.0.0 or higher
   ```
 
 **"Server disconnected" error:**
