@@ -49,14 +49,14 @@ Claude Desktop → mcp-remote → https://your-server.com
 ## 📋 Prerequisites
 
 **Server Requirements:**
-- Node.js 16+ or Docker
+- Node.js 20+ or Docker
 - 512MB RAM minimum
 - Public IP or domain name
 - (Recommended) SSL certificate for HTTPS
 
 **Client Requirements:**
 - Claude Desktop
-- Node.js 18+ (for mcp-remote)
+- Node.js 20+ (for mcp-remote)
 - Or Claude Pro/Team (for native remote MCP)
 
 ## 🚀 Quick Start
@@ -743,7 +743,7 @@ curl -v -H "Authorization: Bearer YOUR_TOKEN" \
 **"TransformStream is not defined":**
 ```bash
 # Check Node.js version on CLIENT machine
-node --version  # Must be 18+
+node --version  # Must be 20+
 
 # Update Node.js
 # macOS: brew upgrade node
