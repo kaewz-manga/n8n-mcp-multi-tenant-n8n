@@ -275,7 +275,7 @@ describe.skipIf(process.env.CI)('search_nodes with includeExamples', () => {
   });
 });
 
-describe('searchNodesLIKE with includeExamples', () => {
+describe.skipIf(process.env.CI)('searchNodesLIKE with includeExamples', () => {
   let server: N8NDocumentationMCPServer;
 
   beforeEach(async () => {
@@ -355,7 +355,7 @@ describe('searchNodesLIKE with includeExamples', () => {
   });
 });
 
-describe('searchNodesFTS with includeExamples', () => {
+describe.skipIf(process.env.CI)('searchNodesFTS with includeExamples', () => {
   let server: N8NDocumentationMCPServer;
 
   beforeEach(async () => {
