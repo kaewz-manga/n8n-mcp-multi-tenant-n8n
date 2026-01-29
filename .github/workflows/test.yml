@@ -59,7 +59,8 @@ jobs:
         run: npm run build
 
       - name: Run integration tests
-        run: npm run test:integration
+        run: npm run test:integration -- --teardownTimeout 5000
+        timeout-minutes: 15
 
   coverage-report:
     name: Generate Coverage Report
