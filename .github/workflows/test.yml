@@ -34,6 +34,13 @@ jobs:
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
+    environment: n8n-mcp-multi-tanant-n8n
+
+    env:
+      N8N_API_URL: ${{ secrets.N8N_API_URL }}
+      N8N_API_KEY: ${{ secrets.N8N_API_KEY }}
+      N8N_TEST_CLEANUP_ENABLED: ${{ secrets.N8N_TEST_CLEANUP_ENABLED }}
+      N8N_TEST_TAG: ${{ secrets.N8N_TEST_TAG }}
 
     steps:
       - name: Checkout code
@@ -53,7 +60,6 @@ jobs:
 
       - name: Run integration tests
         run: npm run test:integration
-        continue-on-error: true  # Integration tests may require external services
 
   coverage-report:
     name: Generate Coverage Report
