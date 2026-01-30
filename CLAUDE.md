@@ -4,240 +4,247 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-n8n-mcp is a comprehensive documentation and knowledge server that provides AI assistants with complete access to n8n node information through the Model Context Protocol (MCP). It serves as a bridge between n8n's workflow automation platform and AI models, enabling them to understand and work with n8n nodes effectively.
+n8n-mcp (v2.33.2) is a multi-tenant MCP server that provides AI assistants with access to n8n node information through the Model Context Protocol. It bridges n8n's workflow automation platform and AI models.
 
-### Current Architecture:
+- **Repository**: github.com/kaewz-manga/n8n-mcp-multi-tenant-n8n
+- **Production URL**: http://localhost:3011 (container port 3000)
+- **Docker container**: `n8n-mcp-dynamic`
+- **Usage Dashboard**: http://localhost:3011/usage.html
+
+## Architecture
+
 ```
 src/
 ├── loaders/
-│   └── node-loader.ts         # NPM package loader for both packages
+│   └── node-loader.ts              # NPM package loader
 ├── parsers/
-│   ├── node-parser.ts         # Enhanced parser with version support
-│   └── property-extractor.ts  # Dedicated property/operation extraction
+│   ├── node-parser.ts              # Node metadata parser
+│   └── property-extractor.ts       # Property/operation extraction
 ├── mappers/
-│   └── docs-mapper.ts         # Documentation mapping with fixes
+│   └── docs-mapper.ts              # Documentation mapping
 ├── database/
-│   ├── schema.sql             # SQLite schema
-│   ├── node-repository.ts     # Data access layer
-│   └── database-adapter.ts    # Universal database adapter (NEW in v2.3)
+│   ├── schema.sql                  # SQLite schema
+│   ├── node-repository.ts          # Data access layer
+│   └── database-adapter.ts         # Universal DB adapter (better-sqlite3 / sql.js)
 ├── services/
-│   ├── property-filter.ts     # Filters properties to essentials (NEW in v2.4)
-│   ├── example-generator.ts   # Generates working examples (NEW in v2.4)
-│   ├── task-templates.ts      # Pre-configured node settings (NEW in v2.4)
-│   ├── config-validator.ts    # Configuration validation (NEW in v2.4)
-│   ├── enhanced-config-validator.ts # Operation-aware validation (NEW in v2.4.2)
-│   ├── node-specific-validators.ts  # Node-specific validation logic (NEW in v2.4.2)
-│   ├── property-dependencies.ts # Dependency analysis (NEW in v2.4)
-│   ├── type-structure-service.ts # Type structure validation (NEW in v2.22.21)
-│   ├── expression-validator.ts # n8n expression syntax validation (NEW in v2.5.0)
-│   └── workflow-validator.ts  # Complete workflow validation (NEW in v2.5.0)
+│   ├── property-filter.ts          # AI-friendly property filtering
+│   ├── example-generator.ts        # Working example generation
+│   ├── task-templates.ts           # Pre-configured node settings
+│   ├── config-validator.ts         # Configuration validation
+│   ├── enhanced-config-validator.ts # Operation-aware validation
+│   ├── node-specific-validators.ts # Per-node validation logic
+│   ├── property-dependencies.ts    # Dependency analysis
+│   ├── type-structure-service.ts   # Type structure validation
+│   ├── expression-validator.ts     # n8n expression syntax validation
+│   └── workflow-validator.ts       # Complete workflow validation
 ├── types/
-│   ├── type-structures.ts      # Type structure definitions (NEW in v2.22.21)
-│   ├── instance-context.ts     # Multi-tenant instance configuration
-│   └── session-state.ts        # Session persistence types (NEW in v2.24.1)
+│   ├── type-structures.ts          # Type structure definitions
+│   ├── instance-context.ts         # Multi-tenant instance config
+│   └── session-state.ts            # Session persistence types
 ├── constants/
-│   └── type-structures.ts      # 23 complete type structures (NEW in v2.22.21)
+│   └── type-structures.ts          # 23 type structure definitions
 ├── templates/
-│   ├── template-fetcher.ts    # Fetches templates from n8n.io API (NEW in v2.4.1)
-│   ├── template-repository.ts # Template database operations (NEW in v2.4.1)
-│   └── template-service.ts    # Template business logic (NEW in v2.4.1)
-├── scripts/
-│   ├── rebuild.ts             # Database rebuild with validation
-│   ├── validate.ts            # Node validation
-│   ├── test-nodes.ts          # Critical node tests
-│   ├── test-essentials.ts     # Test new essentials tools (NEW in v2.4)
-│   ├── test-enhanced-validation.ts # Test enhanced validation (NEW in v2.4.2)
-│   ├── test-structure-validation.ts # Test type structure validation (NEW in v2.22.21)
-│   ├── test-workflow-validation.ts # Test workflow validation (NEW in v2.5.0)
-│   ├── test-ai-workflow-validation.ts # Test AI workflow validation (NEW in v2.5.1)
-│   ├── test-mcp-tools.ts      # Test MCP tool enhancements (NEW in v2.5.1)
-│   ├── test-n8n-validate-workflow.ts # Test n8n_validate_workflow tool (NEW in v2.6.3)
-│   ├── test-typeversion-validation.ts # Test typeVersion validation (NEW in v2.6.1)
-│   ├── test-workflow-diff.ts  # Test workflow diff engine (NEW in v2.7.0)
-│   ├── test-tools-documentation.ts # Test tools documentation (NEW in v2.7.3)
-│   ├── fetch-templates.ts     # Fetch workflow templates from n8n.io (NEW in v2.4.1)
-│   └── test-templates.ts      # Test template functionality (NEW in v2.4.1)
+│   ├── template-fetcher.ts         # n8n.io API template fetcher
+│   ├── template-repository.ts      # Template DB operations
+│   └── template-service.ts         # Template business logic
 ├── mcp/
-│   ├── server.ts              # MCP server with enhanced tools
-│   ├── tools.ts               # Tool definitions including new essentials
-│   ├── tools-documentation.ts # Tool documentation system (NEW in v2.7.3)
-│   └── index.ts               # Main entry point with mode selection
+│   ├── server.ts                   # MCP server with tools
+│   ├── tools.ts                    # Tool definitions
+│   ├── tools-documentation.ts      # Tool documentation system
+│   └── index.ts                    # Entry point with mode selection
 ├── utils/
-│   ├── console-manager.ts     # Console output isolation (NEW in v2.3.1)
-│   └── logger.ts              # Logging utility with HTTP awareness
-├── http-server/               # Modular HTTP server (refactored v2.33.2)
-│   ├── index.ts               # Main server with Express setup
-│   ├── session-manager.ts     # Session lifecycle management
-│   ├── request-handler.ts     # MCP request handling
-│   ├── session-persistence.ts # Export/restore API (NEW in v2.24.1)
-│   ├── sse-middleware.ts      # SSE to JSON conversion
-│   └── types.ts               # Type definitions
-├── mcp-engine.ts              # Clean API for service integration (NEW in v2.3.1)
-│                                # Session persistence wrappers (NEW in v2.24.1)
-└── index.ts                   # Library exports
+│   ├── console-manager.ts          # Console output isolation
+│   └── logger.ts                   # Logging with HTTP awareness
+├── http-server/
+│   ├── index.ts                    # Express server setup + rate limiting
+│   ├── session-manager.ts          # Session lifecycle
+│   ├── request-handler.ts          # MCP request handling
+│   ├── session-persistence.ts      # Export/restore API
+│   ├── sse-middleware.ts           # SSE to JSON conversion
+│   └── types.ts                    # Type definitions
+├── mcp-engine.ts                   # Clean API for service integration
+├── public/
+│   └── usage.html                  # Usage dashboard UI
+└── index.ts                        # Library exports
 ```
 
-## Common Development Commands
+## Common Commands
 
 ```bash
-# Build and Setup
-npm run build          # Build TypeScript (always run after changes)
-npm run rebuild        # Rebuild node database from n8n packages
-npm run validate       # Validate all node data in database
+# Build
+npm run build              # TypeScript build (run after every change)
+npm run rebuild            # Rebuild node database from n8n packages
+npm run validate           # Validate all node data
 
-# Testing
-npm test               # Run all tests
-npm run test:unit      # Run unit tests only
-npm run test:integration # Run integration tests
-npm run test:coverage  # Run tests with coverage report
-npm run test:watch     # Run tests in watch mode
-npm run test:structure-validation # Test type structure validation (Phase 3)
+# Test
+npm test                   # All tests
+npm run test:unit          # Unit tests only
+npm run test:integration   # Integration tests
+npm run test:coverage      # Tests with coverage
+npm run test:watch         # Watch mode
 
-# Run a single test file
+# Single test file
 npm test -- tests/unit/services/property-filter.test.ts
 
-# Linting and Type Checking
-npm run lint           # Check TypeScript types (alias for typecheck)
-npm run typecheck      # Check TypeScript types
+# Type checking
+npm run lint               # TypeScript type check
+npm run typecheck          # Same as lint
 
-# Running the Server
-npm start              # Start MCP server in stdio mode
-npm run start:http     # Start MCP server in HTTP mode
-npm run dev            # Build, rebuild database, and validate
-npm run dev:http       # Run HTTP server with auto-reload
+# Run server
+npm start                  # stdio mode (Claude Desktop)
+npm run start:http         # HTTP mode
+npm run dev                # Build + rebuild DB + validate
+npm run dev:http           # HTTP with auto-reload
 
-# Update n8n Dependencies
-npm run update:n8n:check  # Check for n8n updates (dry run)
-npm run update:n8n        # Update n8n packages to latest
+# n8n updates
+npm run update:n8n:check   # Dry run check
+npm run update:n8n         # Update n8n packages
 
-# Database Management
-npm run db:rebuild     # Rebuild database from scratch
-npm run migrate:fts5   # Migrate to FTS5 search (if needed)
+# Database
+npm run db:rebuild         # Rebuild from scratch
+npm run migrate:fts5       # Migrate to FTS5 search
 
-# Template Management
-npm run fetch:templates  # Fetch latest workflow templates from n8n.io
-npm run test:templates   # Test template functionality
+# Templates
+npm run fetch:templates    # Fetch from n8n.io
+npm run test:templates     # Test template system
+
+# Docker
+docker compose build       # Build image
+docker compose up -d       # Start container
+docker compose logs -f     # View logs
 ```
 
-## High-Level Architecture
+## Docker Deployment
 
-### Core Components
+Container runs on port 3011 (mapped from internal 3000).
 
-1. **MCP Server** (`mcp/server.ts`)
-   - Implements Model Context Protocol for AI assistants
-   - Provides tools for searching, validating, and managing n8n nodes
-   - Supports both stdio (Claude Desktop) and HTTP modes
+```bash
+# Rebuild and restart after code changes
+npm run build && docker compose build && docker compose up -d
 
-2. **Database Layer** (`database/`)
-   - SQLite database storing all n8n node information
-   - Universal adapter pattern supporting both better-sqlite3 and sql.js
-   - Full-text search capabilities with FTS5
+# Check status
+docker ps --filter name=n8n-mcp-dynamic
+curl http://localhost:3011/health
+```
 
-3. **Node Processing Pipeline**
-   - **Loader** (`loaders/node-loader.ts`): Loads nodes from n8n packages
-   - **Parser** (`parsers/node-parser.ts`): Extracts node metadata and structure
-   - **Property Extractor** (`parsers/property-extractor.ts`): Deep property analysis
-   - **Docs Mapper** (`mappers/docs-mapper.ts`): Maps external documentation
+**Dockerfile** uses two-stage build:
+1. Builder stage: TypeScript compilation
+2. Runtime stage: Minimal Node.js 22 Alpine with better-sqlite3
 
-4. **Service Layer** (`services/`)
-   - **Property Filter**: Reduces node properties to AI-friendly essentials
-   - **Config Validator**: Multi-profile validation system
-   - **Type Structure Service**: Validates complex type structures (filter, resourceMapper, etc.)
-   - **Expression Validator**: Validates n8n expression syntax
-   - **Workflow Validator**: Complete workflow structure validation
+Key files copied to container: `dist/`, `data/nodes.db`, `public/`, `docker/`
 
-5. **Template System** (`templates/`)
-   - Fetches and stores workflow templates from n8n.io
-   - Provides pre-built workflow examples
-   - Supports template search and validation
+## HTTP Endpoints
 
-### Key Design Patterns
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/` | No | Server info and capabilities |
+| GET | `/health` | No | Health check with session metrics |
+| GET | `/stats?api_key=KEY` | No | Usage stats for an API key |
+| GET | `/usage.html` | No | Usage dashboard UI |
+| POST | `/mcp` | Yes | Main MCP endpoint |
+| POST | `/mcp/test` | Yes | Test endpoint |
+| DELETE | `/mcp` | Yes | Terminate session |
 
-1. **Repository Pattern**: All database operations go through repository classes
-2. **Service Layer**: Business logic separated from data access
-3. **Validation Profiles**: Different validation strictness levels (minimal, runtime, ai-friendly, strict)
-4. **Diff-Based Updates**: Efficient workflow updates using operation diffs
+## Rate Limiting
 
-### MCP Tools Architecture
+Tracked per API key (`x-n8n-key` header), stored in-memory.
 
-The MCP server exposes tools in several categories:
+| Limit | Default | Env Variable |
+|-------|---------|-------------|
+| Per minute | 50 | `RATE_LIMIT_PER_MINUTE` |
+| Per day | 100 | `DAILY_LIMIT` |
+| Auth failures | 20/15min per IP | `AUTH_RATE_LIMIT_MAX` |
 
-1. **Discovery Tools**: Finding and exploring nodes
-2. **Configuration Tools**: Getting node details and examples
-3. **Validation Tools**: Validating configurations before deployment
-4. **Workflow Tools**: Complete workflow validation
-5. **Management Tools**: Creating and updating workflows (requires API config)
+Middleware chain: `dailyLimiter -> rateLimiter -> authLimiter -> trackUsage -> handler`
 
-## Memories and Notes for Development
+## Environment Variables
 
-### Development Workflow Reminders
-- When you make changes to MCP server, you need to ask the user to reload it before you test
-- When the user asks to review issues, you should use GH CLI to get the issue and all the comments
-- When the task can be divided into separated subtasks, you should spawn separate sub-agents to handle them in parallel
-- Use the best sub-agent for the task as per their descriptions
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `ENABLE_MULTI_TENANT` | Yes | `true` | Multi-tenant mode |
+| `AUTH_TOKEN` | Yes (HTTP) | - | Server auth token |
+| `MCP_MODE` | No | `http` | `http`, `stdio`, or `sse` |
+| `PORT` | No | `3000` | Internal container port |
+| `RATE_LIMIT_PER_MINUTE` | No | `50` | Rate limit per API key |
+| `DAILY_LIMIT` | No | `100` | Daily limit per API key |
+| `LOG_LEVEL` | No | `info` | `error`, `warn`, `info`, `debug` |
+| `CORS_ORIGIN` | No | `*` | CORS allowed origin |
+| `TRUST_PROXY` | No | `0` | Proxy hops for IP detection |
+| `N8N_MCP_MAX_SESSIONS` | No | `100` | Max concurrent sessions |
 
-### Testing Best Practices
-- Always run `npm run build` before testing changes
-- Use `npm run dev` to rebuild database after package updates
-- Check coverage with `npm run test:coverage`
-- Integration tests require a clean database state
+## Multi-Tenant Architecture
 
-### Common Pitfalls
-- The MCP server needs to be reloaded in Claude Desktop after changes
-- HTTP mode requires proper CORS and auth token configuration
-- Database rebuilds can take 2-3 minutes due to n8n package size
-- Always validate workflows before deployment to n8n
+Stateless multi-tenant via request headers (no user registration):
+- `x-n8n-url`: n8n instance URL
+- `x-n8n-key`: n8n API key
+- `x-instance-id`: Optional instance identifier
+- `x-session-id`: Optional session ID
 
-### Performance Considerations
-- Use `get_node_essentials()` instead of `get_node_info()` for faster responses
+Each request identifies its n8n instance. No server-side credentials stored.
+
+## Session Persistence (v2.24.1)
+
+Enables zero-downtime deployments for SaaS platforms.
+
+- `exportSessionState()` / `restoreSessionState()` methods
+- Only exports sessions with valid n8nApiUrl and n8nApiKey
+- Skips expired sessions (default timeout: 30 min)
+- Transport objects recreated on-demand (not persisted)
+- API keys exported as plaintext - downstream MUST encrypt
+
+Files: `src/types/session-state.ts`, `src/http-server/session-persistence.ts`, `src/mcp-engine.ts`
+
+## MCP Tools Categories
+
+1. **Discovery**: Search and explore n8n nodes
+2. **Configuration**: Node details and examples
+3. **Validation**: Config validation before deployment
+4. **Workflow**: Complete workflow validation
+5. **Management**: Create/update workflows (requires API config)
+
+## Key Design Patterns
+
+- **Repository Pattern**: All DB operations via repository classes
+- **Service Layer**: Business logic separated from data access
+- **Validation Profiles**: minimal, runtime, ai-friendly, strict
+- **Diff-Based Updates**: 80-90% token savings on workflow updates
+- **Universal DB Adapter**: Supports both better-sqlite3 and sql.js
+
+## Development Workflow
+
+### Before Making Changes
+1. Read all relevant files first
+2. Run `npm run build` after every code change
+3. Run `npm run lint` to check types
+4. Test with `npm test`
+
+### After Code Changes to HTTP Server
+1. `npm run build`
+2. `docker compose build`
+3. `docker compose up -d`
+4. Ask user to reload MCP server in Claude Desktop if needed
+
+### Performance Tips
+- Use `get_node_essentials()` over `get_node_info()` for faster responses
 - Batch validation operations when possible
-- The diff-based update system saves 80-90% tokens on workflow updates
+- Diff-based updates save tokens on workflow modifications
 
-### Agent Interaction Guidelines
-- Sub-agents are not allowed to spawn further sub-agents
-- When you use sub-agents, do not allow them to commit and push. That should be done by you
+## Agent Interaction Guidelines
 
-### Development Best Practices
-- Run typecheck and lint after every code change
+- Sub-agents must not spawn further sub-agents
+- Sub-agents must not commit or push; the main agent handles that
+- When tasks can be divided, use parallel sub-agents
+- Use GH CLI for reviewing issues (get issue + all comments)
+- Do not use hyperbolic or dramatic language in comments/docs
+- Add to every commit and PR: Conceived by Romuald Czlonkowski - www.aiadvisors.pl/en (not in conversations)
 
-### Session Persistence Feature (v2.24.1)
+## Important Reminders
 
-**Location:**
-- Types: `src/types/session-state.ts`
-- Implementation: `src/http-server/session-manager.ts` and `src/http-server/session-persistence.ts`
-- Main Server: `src/http-server/index.ts`
-- Wrapper: `src/mcp-engine.ts`
-- Tests: `tests/unit/http-server/session-persistence.test.ts`, `tests/unit/mcp-engine/session-persistence.test.ts`
-
-**Key Features:**
-- **Export/Restore API**: `exportSessionState()` and `restoreSessionState()` methods
-- **Multi-tenant support**: Enables zero-downtime deployments for SaaS platforms
-- **Security-first**: API keys exported as plaintext - downstream MUST encrypt
-- **Dormant sessions**: Restored sessions recreate transports on first request
-- **Automatic expiration**: Respects `sessionTimeout` setting (default 30 min)
-- **MAX_SESSIONS limit**: Caps at 100 concurrent sessions (configurable via N8N_MCP_MAX_SESSIONS env var)
-
-**Important Implementation Notes:**
-- Only exports sessions with valid n8nApiUrl and n8nApiKey in context
-- Skips expired sessions during both export and restore
-- Uses `validateInstanceContext()` for data integrity checks
-- Handles null/invalid session gracefully with warnings
-- Session metadata (timestamps) and context (credentials) are persisted
-- Transport and server objects are NOT persisted (recreated on-demand)
-
-**Testing:**
-- 22 unit tests covering export, restore, edge cases, and round-trip cycles
-- Tests use current timestamps to avoid expiration issues
-- Integration with multi-tenant backends documented in README.md
-
-# important-instruction-reminders
-Do what has been asked; nothing more, nothing less.
-NEVER create files unless they're absolutely necessary for achieving your goal.
-ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
-- When you make changes to MCP server, you need to ask the user to reload it before you test
-- When the user asks to review issues, you should use GH CLI to get the issue and all the comments
-- When the task can be divided into separated subtasks, you should spawn separate sub-agents to handle them in paralel
-- Use the best sub-agent for the task as per their descriptions
-- Do not use hyperbolic or dramatic language in comments and documentation
-- Add to every commit and PR: Concieved by Romuald Członkowski - and then link to www.aiadvisors.pl/en. Don't add it in conversations
+- NEVER create files unless absolutely necessary; prefer editing existing files
+- NEVER proactively create documentation files unless explicitly requested
+- Always run typecheck and lint after code changes
+- When making MCP server changes, ask user to reload before testing
+- Database rebuilds are slow due to n8n package size
+- Always validate workflows before deployment to n8n
+- HTTP mode requires proper CORS and auth token configuration
+- Integration tests require a clean database state
