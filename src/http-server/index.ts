@@ -10,6 +10,7 @@ import { ConsoleManager } from '../utils/console-manager';
 import { logger } from '../utils/logger';
 import { AuthManager } from '../utils/auth';
 import { readFileSync } from 'fs';
+import path from 'path';
 import dotenv from 'dotenv';
 import { getStartupBaseUrl, formatEndpointUrls, detectBaseUrl } from '../utils/url-detector';
 import { PROJECT_VERSION } from '../utils/version';
@@ -195,6 +196,9 @@ export class SingleSessionHTTPServer {
 
     // SSE to JSON conversion middleware for n8n compatibility
     app.use(sseToJsonMiddleware);
+
+    // Serve static files (usage dashboard, etc.)
+    app.use(express.static(path.join(process.cwd(), 'public')));
 
     // Request logging middleware
     app.use((req, res, next) => {

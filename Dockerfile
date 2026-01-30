@@ -49,6 +49,7 @@ COPY --from=builder /app/dist ./dist
 # Cache bust: 2025-07-06-trigger-fix-v3 - includes is_trigger=true for webhook,cron,interval,emailReadImap
 COPY data/nodes.db ./data/
 COPY src/database/schema-optimized.sql ./src/database/
+COPY public ./public
 COPY .env.example ./
 
 # Copy entrypoint script, config parser, and n8n-mcp command
