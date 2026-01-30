@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>n8n-MCP Usage Dashboard</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f1117;
+      color: #e1e4e8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 520px;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      color: #f0f0f0;
+      text-align: center;
+    }
+    .input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      background: #161b22;
+      color: #e1e4e8;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #58a6ff;
+    }
+    input[type="text"]::placeholder {
+      color: #6e7681;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background: #238636;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    button:hover { background: #2ea043; }
+    button:disabled {
+      background: #21262d;
+      color: #6e7681;
+      cursor: not-allowed;
+    }
+    .auto-refresh {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #8b949e;
+    }
+    .auto-refresh input[type="checkbox"] {
+      accent-color: #58a6ff;
+    }
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #8b949e;
+      margin-bottom: 14px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .stat-label { font-size: 14px; color: #c9d1d9; }
+    .stat-value { font-size: 14px; font-weight: 600; }
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #21262d;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 6px;
+      margin-bottom: 16px;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease, background 0.4s ease;
+    }
+    .progress-fill.green { background: #238636; }
+    .progress-fill.yellow { background: #d29922; }
+    .progress-fill.red { background: #f85149; }
+    .reset-info {
+      font-size: 12px;
+      color: #6e7681;
+      text-align: right;
+    }
+    .status {
+      text-align: center;
+      padding: 40px 20px;
+      color: #8b949e;
+      font-size: 14px;
+    }
+    .status.error { color: #f85149; }
+    .api-key-display {
+      text-align: center;
+      font-size: 13px;
+      color: #6e7681;
+      margin-bottom: 16px;
+    }
+    .timestamp {
+      text-align: center;
+      font-size: 12px;
+      color: #484f58;
+      margin-top: 8px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>n8n-MCP Usage</h1>
+
+    <div class="input-group">
+      <input type="text" id="apiKey" placeholder="Enter your n8n API key" />
+      <button id="checkBtn" onclick="checkUsage()">Check</button>
+    </div>
+
+    <div id="statusMsg" class="status">Enter your API key to check usage limits.</div>
+
+    <div id="results" class="hidden">
+      <div id="apiKeyDisplay" class="api-key-display"></div>
+
+      <div class="auto-refresh">
+        <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()" />
+        <label for="autoRefresh">Auto-refresh every 30s</label>
+      </div>
+
+      <!-- Per-Minute Card -->
+      <div class="card">
+        <div class="card-title">Per Minute</div>
+        <div class="stat-row">
+          <span class="stat-label">Used</span>
+          <span class="stat-value" id="minUsed">-</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Remaining</span>
+          <span class="stat-value" id="minRemaining">-</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill green" id="minBar" style="width:0%"></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Limit</span>
+          <span class="stat-value" id="minLimit">-</span>
+        </div>
+        <div class="reset-info" id="minReset"></div>
+      </div>
+
+      <!-- Daily Card -->
+      <div class="card">
+        <div class="card-title">Daily</div>
+        <div class="stat-row">
+          <span class="stat-label">Used</span>
+          <span class="stat-value" id="dayUsed">-</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Remaining</span>
+          <span class="stat-value" id="dayRemaining">-</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill green" id="dayBar" style="width:0%"></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Limit</span>
+          <span class="stat-value" id="dayLimit">-</span>
+        </div>
+        <div class="reset-info" id="dayReset"></div>
+      </div>
+
+      <div class="timestamp" id="timestamp"></div>
+    </div>
+  </div>
+
+  <script>
+    let refreshInterval = null;
+
+    const $ = (id) => document.getElementById(id);
+
+    // Restore saved key
+    const savedKey = localStorage.getItem('n8n_mcp_api_key');
+    if (savedKey) $('apiKey').value = savedKey;
+
+    $('apiKey').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') checkUsage();
+    });
+
+    async function checkUsage() {
+      const apiKey = $('apiKey').value.trim();
+      if (!apiKey) return;
+
+      localStorage.setItem('n8n_mcp_api_key', apiKey);
+
+      $('checkBtn').disabled = true;
+      $('checkBtn').textContent = '...';
+      $('statusMsg').className = 'status';
+      $('statusMsg').textContent = 'Loading...';
+      $('statusMsg').classList.remove('hidden');
+      $('results').classList.add('hidden');
+
+      try {
+        const res = await fetch(`/stats?api_key=${encodeURIComponent(apiKey)}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        renderData(data);
+      } catch (err) {
+        $('statusMsg').className = 'status error';
+        $('statusMsg').textContent = `Failed to fetch: ${err.message}`;
+        $('statusMsg').classList.remove('hidden');
+        $('results').classList.add('hidden');
+      } finally {
+        $('checkBtn').disabled = false;
+        $('checkBtn').textContent = 'Check';
+      }
+    }
+
+    function renderData(data) {
+      $('statusMsg').classList.add('hidden');
+      $('results').classList.remove('hidden');
+      $('apiKeyDisplay').textContent = `Key: ${data.api_key}`;
+
+      if (data.message === 'No usage recorded yet') {
+        // No usage yet - show limits only
+        const lim = data.limits;
+        setBar('min', 0, lim.per_minute, null);
+        setBar('day', 0, lim.per_day, null);
+        $('timestamp').textContent = '';
+        return;
+      }
+
+      const m = data.usage.minute;
+      const d = data.usage.daily;
+
+      setBar('min', m.used, m.limit, `Resets in ${m.resets_in_seconds}s`);
+      setBar('day', d.used, d.limit, `Resets in ${d.resets_in_hours}h`);
+      $('timestamp').textContent = `Last updated: ${new Date(data.timestamp).toLocaleTimeString()}`;
+    }
+
+    function setBar(prefix, used, limit, resetText) {
+      const remaining = Math.max(0, limit - used);
+      const pct = limit > 0 ? (used / limit) * 100 : 0;
+
+      $(prefix + 'Used').textContent = used;
+      $(prefix + 'Remaining').textContent = remaining;
+      $(prefix + 'Limit').textContent = limit;
+
+      const bar = $(prefix + 'Bar');
+      bar.style.width = pct + '%';
+      bar.className = 'progress-fill ' + (pct < 60 ? 'green' : pct < 85 ? 'yellow' : 'red');
+
+      const resetEl = $(prefix + 'Reset');
+      resetEl.textContent = resetText || '';
+    }
+
+    function toggleAutoRefresh() {
+      if ($('autoRefresh').checked) {
+        refreshInterval = setInterval(checkUsage, 30000);
+      } else {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+    }
+  </script>
+</body>
+</html>
